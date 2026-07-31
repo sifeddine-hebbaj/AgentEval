@@ -29,6 +29,7 @@ api = [
     "celery>=5.4",
     "slowapi>=0.1.9",
     "boto3>=1.34",
+    "pydantic-settings>=2.0",
 ]
 dev = [
     "pytest>=8.2",
