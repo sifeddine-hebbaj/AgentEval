@@ -29,8 +29,16 @@ from agenteval_core.scorers.llm_judge import (
     OpenAIJudgeAdapter,
 )
 
-_engine = create_engine(_sync_url(settings.database_url), pool_pre_ping=True)
-_Session: sessionmaker[Session] = sessionmaker(bind=_engine)
+_engine = None
+_Session = None
+
+
+def _get_sessionmaker():
+    global _engine, _Session
+    if _engine is None:
+        _engine = create_engine(_sync_url(settings.database_url), pool_pre_ping=True)
+        _Session = sessionmaker(bind=_engine)
+    return _Session
 
 
 def _build_judge_adapter():
@@ -77,7 +85,8 @@ def score_test_case_task(
     eval_suite_id: str,
     dataset_version_id: str,
 ) -> None:
-    with _Session() as session:
+    Session = _get_sessionmaker()
+    with Session() as session:
         test_case_row = session.get(TestCaseORM, uuid.UUID(test_case_id))
         if test_case_row is None:
             raise KeyError(f"test case {test_case_id} not found")
