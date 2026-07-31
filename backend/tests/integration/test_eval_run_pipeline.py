@@ -88,8 +88,9 @@ async def test_full_eval_run_pipeline_with_real_celery_worker(project_and_key):
 
         # Fetch actual test case IDs by re-querying the DB directly (simplest
         # way to get IDs for this test without adding a new list endpoint).
-        from agenteval_api.models.orm import TestCaseORM
         from sqlalchemy import select
+
+        from agenteval_api.models.orm import TestCaseORM
 
         async with SessionLocal() as session:
             result = await session.execute(select(TestCaseORM).where(TestCaseORM.dataset_version_id == version_id))

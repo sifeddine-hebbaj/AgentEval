@@ -3,8 +3,8 @@ Docker, just pip install and go (NFR-USE-1's spirit).
 """
 from pathlib import Path
 
-from agenteval_sdk.client import Client
 from agenteval_core.scorers.deterministic import ExactMatchScorer
+from agenteval_sdk.client import Client
 
 
 def test_local_client_full_loop(tmp_path: Path):

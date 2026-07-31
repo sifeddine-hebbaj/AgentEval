@@ -20,8 +20,8 @@ from agenteval_api.models.orm import (
 from agenteval_api.repositories.postgres_repo import PostgresEvalResultRepository, _sync_url
 from agenteval_core.engine import EvalEngine
 from agenteval_core.models import RunStatus, TestCase
-from agenteval_core.scorers.base import Scorer
 from agenteval_core.scorers import registry as core_registry
+from agenteval_core.scorers.base import Scorer
 from agenteval_core.scorers.llm_judge import (
     AnthropicJudgeAdapter,
     LLMJudgeScorer,

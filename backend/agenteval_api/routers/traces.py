@@ -18,8 +18,7 @@ from agenteval_api.config import settings
 from agenteval_api.db import get_db
 from agenteval_api.deps import get_current_project_id
 from agenteval_api.models.orm import Span, Trace
-from agenteval_api.schemas.schemas import SpanIn
-from agenteval_api.schemas.schemas import TraceDetailOut, TraceIn, TraceOut
+from agenteval_api.schemas.schemas import SpanIn, TraceDetailOut, TraceIn, TraceOut
 
 router = APIRouter(prefix="/v1/traces", tags=["traces"])
 

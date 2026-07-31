@@ -14,10 +14,12 @@ from agenteval_api.deps import get_current_project_id
 from agenteval_api.models.orm import (
     Baseline,
     DatasetVersion,
-    EvalResult as EvalResultORM,
     EvalRun,
     Score,
     TestCaseORM,
+)
+from agenteval_api.models.orm import (
+    EvalResult as EvalResultORM,
 )
 from agenteval_api.schemas.schemas import (
     EvalResultOut,
@@ -29,7 +31,6 @@ from agenteval_api.schemas.schemas import (
     SignificanceEntry,
 )
 from agenteval_core.stats import bootstrap_paired_delta
-from agenteval_core.stats import SignificanceResult as StatsSignificanceResult
 
 router = APIRouter(prefix="/v1/eval-runs", tags=["eval-runs"])
 

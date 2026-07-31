@@ -7,7 +7,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-
 # -- Auth ---------------------------------------------------------------------
 
 class LoginRequest(BaseModel):
