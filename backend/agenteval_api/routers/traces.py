@@ -18,6 +18,7 @@ from agenteval_api.db import get_db
 from agenteval_api.deps import get_current_project_id
 from agenteval_api.models.orm import Span, Trace
 from agenteval_api.schemas.schemas import TraceDetailOut, TraceIn, TraceOut
+from datetime import UTC
 
 router = APIRouter(prefix="/v1/traces", tags=["traces"])
 
@@ -54,9 +55,9 @@ async def ingest_trace(
         ended_at=payload.ended_at,
     )
     if trace.started_at is None:
-        from datetime import datetime, timezone
+        from datetime import datetime
 
-        trace.started_at = datetime.now(timezone.utc)
+        trace.started_at = datetime.now(UTC)
 
     total_tokens, total_cost = 0, 0.0
     for span_in in payload.spans:

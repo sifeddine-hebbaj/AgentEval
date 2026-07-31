@@ -13,7 +13,6 @@ from agenteval_api.db import get_db
 from agenteval_api.deps import get_current_project_id
 from agenteval_api.models.orm import (
     Baseline,
-    Dataset,
     DatasetVersion,
     EvalResult as EvalResultORM,
     EvalRun,

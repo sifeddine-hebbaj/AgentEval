@@ -27,7 +27,7 @@ def upload_large_payload(serialized: str) -> str:
     client = _get_client()
     try:
         client.head_bucket(Bucket=BUCKET)
-    except Exception:
+    except client.exceptions.NoSuchBucket:
         client.create_bucket(Bucket=BUCKET)
     key = f"payloads/{uuid.uuid4()}.json"
     client.put_object(Bucket=BUCKET, Key=key, Body=serialized.encode("utf-8"))

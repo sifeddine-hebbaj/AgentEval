@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -53,30 +53,30 @@ class ProjectResponse(BaseModel):
 # -- Traces -----------------------------------------------------------------
 
 class SpanIn(BaseModel):
-    id: Optional[UUID] = None
-    parent_span_id: Optional[UUID] = None
+    id: UUID | None = None
+    parent_span_id: UUID | None = None
     span_type: str = "custom"
     name: str = ""
     input: Any = None
     output: Any = None
-    model_name: Optional[str] = None
+    model_name: str | None = None
     prompt_tokens: int = 0
     completion_tokens: int = 0
     cost: float = 0.0
     status: str = "ok"
-    error_message: Optional[str] = None
-    started_at: Optional[datetime] = None
-    ended_at: Optional[datetime] = None
+    error_message: str | None = None
+    started_at: datetime | None = None
+    ended_at: datetime | None = None
 
 
 class TraceIn(BaseModel):
-    id: Optional[UUID] = None
+    id: UUID | None = None
     environment: str = "development"
     metadata: dict[str, Any] = Field(default_factory=dict)
     status: str = "ok"
     spans: list[SpanIn] = Field(default_factory=list)
-    started_at: Optional[datetime] = None
-    ended_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    ended_at: datetime | None = None
 
 
 class TraceOut(BaseModel):
@@ -85,9 +85,9 @@ class TraceOut(BaseModel):
     status: str
     total_tokens: int
     total_cost: float
-    duration_ms: Optional[int]
+    duration_ms: int | None
     started_at: datetime
-    ended_at: Optional[datetime]
+    ended_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -172,9 +172,9 @@ class EvalRunCreateRequest(BaseModel):
     dataset_version_id: UUID
     eval_suite_id: UUID
     trigger_source: str = "api"
-    git_sha: Optional[str] = None
-    baseline_run_id: Optional[UUID] = None
-    precomputed_outputs: Optional[dict[str, Any]] = None  # test_case_id(str) -> output
+    git_sha: str | None = None
+    baseline_run_id: UUID | None = None
+    precomputed_outputs: dict[str, Any] | None = None  # test_case_id(str) -> output
 
 
 class EvalRunResponse(BaseModel):
@@ -184,18 +184,18 @@ class EvalRunResponse(BaseModel):
     completed_test_cases: int
     aggregate_metrics: dict[str, Any]
     started_at: datetime
-    completed_at: Optional[datetime]
+    completed_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class ScoreOut(BaseModel):
     scorer_name: str
-    numeric_value: Optional[float]
-    boolean_value: Optional[bool]
-    category_value: Optional[str]
-    rationale: Optional[str]
-    error: Optional[str]
+    numeric_value: float | None
+    boolean_value: bool | None
+    category_value: str | None
+    rationale: str | None
+    error: str | None
 
 
 class EvalResultOut(BaseModel):
@@ -203,15 +203,15 @@ class EvalResultOut(BaseModel):
     test_case_id: UUID
     actual_output: Any
     status: str
-    latency_ms: Optional[int]
+    latency_ms: int | None
     scores: list[ScoreOut]
 
 
 class RegressedCase(BaseModel):
     test_case_id: str
     scorer: str
-    baseline_score: Optional[float]
-    new_score: Optional[float]
+    baseline_score: float | None
+    new_score: float | None
 
 
 class SignificanceEntry(BaseModel):
@@ -238,4 +238,4 @@ class ErrorResponse(BaseModel):
     title: str
     status: int
     detail: str
-    instance: Optional[str] = None
+    instance: str | None = None

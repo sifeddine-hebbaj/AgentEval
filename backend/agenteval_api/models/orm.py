@@ -8,9 +8,20 @@ this file describes *how data is persisted*, agenteval_core describes
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
-from sqlalchemy import ARRAY, Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import (
+    ARRAY,
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -22,7 +33,7 @@ def _uuid_col():
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Organization(Base):
@@ -31,7 +42,7 @@ class Organization(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    projects: Mapped[list["Project"]] = relationship(back_populates="organization")
+    projects: Mapped[list[Project]] = relationship(back_populates="organization")
 
 
 class User(Base):
@@ -61,7 +72,7 @@ class Project(Base):
     retention_policy: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    organization: Mapped["Organization"] = relationship(back_populates="projects")
+    organization: Mapped[Organization] = relationship(back_populates="projects")
 
 
 class ApiKey(Base):
@@ -83,7 +94,7 @@ class Dataset(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    versions: Mapped[list["DatasetVersion"]] = relationship(back_populates="dataset", order_by="DatasetVersion.version_number")
+    versions: Mapped[list[DatasetVersion]] = relationship(back_populates="dataset", order_by="DatasetVersion.version_number")
 
 
 class DatasetVersion(Base):
@@ -94,8 +105,8 @@ class DatasetVersion(Base):
     created_by: Mapped[str] = mapped_column(String(200), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    dataset: Mapped["Dataset"] = relationship(back_populates="versions")
-    test_cases: Mapped[list["TestCaseORM"]] = relationship(back_populates="dataset_version")
+    dataset: Mapped[Dataset] = relationship(back_populates="versions")
+    test_cases: Mapped[list[TestCaseORM]] = relationship(back_populates="dataset_version")
 
     __table_args__ = (UniqueConstraint("dataset_id", "version_number", name="uq_dataset_version"),)
 
@@ -111,7 +122,7 @@ class TestCaseORM(Base):
     metadata_: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
 
-    dataset_version: Mapped["DatasetVersion"] = relationship(back_populates="test_cases")
+    dataset_version: Mapped[DatasetVersion] = relationship(back_populates="test_cases")
 
 
 class Trace(Base):
@@ -127,7 +138,7 @@ class Trace(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    spans: Mapped[list["Span"]] = relationship(back_populates="trace")
+    spans: Mapped[list[Span]] = relationship(back_populates="trace")
 
 
 class Span(Base):
@@ -148,7 +159,7 @@ class Span(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    trace: Mapped["Trace"] = relationship(back_populates="spans")
+    trace: Mapped[Trace] = relationship(back_populates="spans")
 
 
 class Scorer(Base):
@@ -159,7 +170,7 @@ class Scorer(Base):
     scorer_type: Mapped[str] = mapped_column(String(50), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    versions: Mapped[list["ScorerVersion"]] = relationship(back_populates="scorer", order_by="ScorerVersion.version_number")
+    versions: Mapped[list[ScorerVersion]] = relationship(back_populates="scorer", order_by="ScorerVersion.version_number")
 
 
 class ScorerVersion(Base):
@@ -171,7 +182,7 @@ class ScorerVersion(Base):
     output_type: Mapped[str] = mapped_column(String(20), default="numeric")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    scorer: Mapped["Scorer"] = relationship(back_populates="versions")
+    scorer: Mapped[Scorer] = relationship(back_populates="versions")
 
     __table_args__ = (UniqueConstraint("scorer_id", "version_number", name="uq_scorer_version"),)
 
@@ -183,7 +194,7 @@ class EvalSuite(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    scorer_links: Mapped[list["EvalSuiteScorer"]] = relationship(back_populates="eval_suite")
+    scorer_links: Mapped[list[EvalSuiteScorer]] = relationship(back_populates="eval_suite")
 
 
 class EvalSuiteScorer(Base):
@@ -194,8 +205,8 @@ class EvalSuiteScorer(Base):
     weight: Mapped[float] = mapped_column(Float, default=1.0)
     is_critical: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    eval_suite: Mapped["EvalSuite"] = relationship(back_populates="scorer_links")
-    scorer_version: Mapped["ScorerVersion"] = relationship()
+    eval_suite: Mapped[EvalSuite] = relationship(back_populates="scorer_links")
+    scorer_version: Mapped[ScorerVersion] = relationship()
 
 
 class EvalRun(Base):
@@ -214,7 +225,7 @@ class EvalRun(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    results: Mapped[list["EvalResult"]] = relationship(back_populates="eval_run")
+    results: Mapped[list[EvalResult]] = relationship(back_populates="eval_run")
 
 
 class EvalResult(Base):
@@ -229,8 +240,8 @@ class EvalResult(Base):
     cost: Mapped[float] = mapped_column(Float, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
-    eval_run: Mapped["EvalRun"] = relationship(back_populates="results")
-    scores: Mapped[list["Score"]] = relationship(back_populates="eval_result")
+    eval_run: Mapped[EvalRun] = relationship(back_populates="results")
+    scores: Mapped[list[Score]] = relationship(back_populates="eval_result")
 
 
 class Score(Base):
@@ -244,7 +255,7 @@ class Score(Base):
     rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    eval_result: Mapped["EvalResult"] = relationship(back_populates="scores")
+    eval_result: Mapped[EvalResult] = relationship(back_populates="scores")
 
     __table_args__ = (UniqueConstraint("eval_result_id", "scorer_name", name="uq_score_per_scorer"),)
 

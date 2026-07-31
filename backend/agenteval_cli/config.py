@@ -1,7 +1,7 @@
 """agenteval.yaml schema and loader."""
 from __future__ import annotations
 
-from typing import Optional
+
 
 import yaml
 from pydantic import BaseModel, Field
@@ -12,8 +12,8 @@ class GateConfig(BaseModel):
     min_mean_score: dict[str, float] = Field(default_factory=dict)
     max_regression_delta: float = 0.05
     critical_tags: list[str] = Field(default_factory=list)
-    max_p95_latency_ms: Optional[int] = None
-    max_total_cost_usd: Optional[float] = None
+    max_p95_latency_ms: int | None = None
+    max_total_cost_usd: float | None = None
 
 
 class ScorerConfig(BaseModel):
@@ -30,7 +30,7 @@ class AgentEvalConfig(BaseModel):
     runner: str
     scorers: list[ScorerConfig] = Field(default_factory=list)
     gate: GateConfig = Field(default_factory=GateConfig)
-    baseline: Optional[str] = None
+    baseline: str | None = None
     base_url: str = "http://localhost:8000"
 
     @classmethod

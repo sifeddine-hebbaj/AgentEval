@@ -14,13 +14,14 @@ the worker deliberately uses sync SQLAlchemy against the same database.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from agenteval_core.models import EvalResult, EvalRunSummary, RunStatus, ScoreResult
-from agenteval_api.models.orm import EvalRun, EvalResult as EvalResultORM, Score
+from agenteval_api.models.orm import EvalResult as EvalResultORM
+from agenteval_api.models.orm import EvalRun, Score
 
 
 def _sync_url(async_url: str) -> str:
@@ -109,7 +110,7 @@ class PostgresEvalResultRepository:
             if aggregate_metrics is not None:
                 run.aggregate_metrics = aggregate_metrics
             if status in (RunStatus.COMPLETED, RunStatus.PARTIAL, RunStatus.FAILED):
-                run.completed_at = datetime.now(timezone.utc)
+                run.completed_at = datetime.now(UTC)
             session.commit()
 
     def get_run_results(self, run_id: str) -> list[EvalResult]:

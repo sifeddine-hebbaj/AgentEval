@@ -1,7 +1,6 @@
 """Proves the SDK's local mode works fully offline: no server, no
 Docker, just pip install and go (NFR-USE-1's spirit).
 """
-import tempfile
 from pathlib import Path
 
 from agenteval_sdk.client import Client

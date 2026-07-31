@@ -17,6 +17,7 @@ from agenteval_api.schemas.schemas import (
     TokenResponse,
 )
 from agenteval_api.security import create_access_token, generate_api_key, verify_password
+from datetime import UTC
 
 router = APIRouter(prefix="/v1/auth", tags=["auth"])
 keys_router = APIRouter(prefix="/v1/api-keys", tags=["api-keys"])
@@ -58,10 +59,10 @@ async def revoke_api_key(
     db: AsyncSession = Depends(get_db),
     _user: User = Depends(get_current_user),
 ):
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     row = await db.get(ApiKey, key_id)
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="API key not found.")
-    row.revoked_at = datetime.now(timezone.utc)
+    row.revoked_at = datetime.now(UTC)
     await db.commit()
