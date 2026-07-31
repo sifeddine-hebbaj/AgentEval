@@ -7,6 +7,7 @@ only helps if the API itself responds fast).
 from __future__ import annotations
 
 import json
+from datetime import UTC
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -18,7 +19,6 @@ from agenteval_api.db import get_db
 from agenteval_api.deps import get_current_project_id
 from agenteval_api.models.orm import Span, Trace
 from agenteval_api.schemas.schemas import TraceDetailOut, TraceIn, TraceOut
-from datetime import UTC
 
 router = APIRouter(prefix="/v1/traces", tags=["traces"])
 

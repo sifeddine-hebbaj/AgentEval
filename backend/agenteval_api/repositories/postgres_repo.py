@@ -14,7 +14,7 @@ the worker deliberately uses sync SQLAlchemy against the same database.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone, UTC
+from datetime import UTC, datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker

@@ -1,6 +1,7 @@
 """Authentication: dashboard login (JWT) + API key management."""
 from __future__ import annotations
 
+from datetime import UTC
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -17,7 +18,6 @@ from agenteval_api.schemas.schemas import (
     TokenResponse,
 )
 from agenteval_api.security import create_access_token, generate_api_key, verify_password
-from datetime import UTC
 
 router = APIRouter(prefix="/v1/auth", tags=["auth"])
 keys_router = APIRouter(prefix="/v1/api-keys", tags=["api-keys"])

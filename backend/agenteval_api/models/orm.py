@@ -8,7 +8,7 @@ this file describes *how data is persisted*, agenteval_core describes
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone, UTC
+from datetime import UTC, datetime
 
 from sqlalchemy import (
     ARRAY,

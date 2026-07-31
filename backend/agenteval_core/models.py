@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _uuid() -> str:
@@ -41,11 +41,11 @@ class SpanType(str, Enum):
 class ScoreResult(BaseModel):
     """The result produced by a single scorer for a single test case/trace."""
 
-    numeric_value: Optional[float] = None
-    boolean_value: Optional[bool] = None
-    category_value: Optional[str] = None
-    rationale: Optional[str] = None
-    error: Optional[str] = None
+    numeric_value: float | None = None
+    boolean_value: bool | None = None
+    category_value: str | None = None
+    rationale: str | None = None
+    error: str | None = None
 
     def passed(self, threshold: float = 0.5) -> bool:
         """Best-effort pass/fail interpretation across output types."""
