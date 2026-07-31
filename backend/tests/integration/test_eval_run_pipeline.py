@@ -10,8 +10,8 @@ import time
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from agenteval_api.main import app
 from agenteval_api.db import SessionLocal
+from agenteval_api.main import app
 from agenteval_api.models.orm import ApiKey, Organization, Project
 from agenteval_api.security import generate_api_key
 
@@ -85,12 +85,11 @@ async def test_full_eval_run_pipeline_with_real_celery_worker(project_and_key):
         suite_id = suite_resp.json()["id"]
 
         # Simulate an agent that gets everything right -- this is the "baseline" run.
-        test_cases_resp = await client.get(f"/v1/datasets/{dataset_id}/versions", headers=headers)
 
         # Fetch actual test case IDs by re-querying the DB directly (simplest
         # way to get IDs for this test without adding a new list endpoint).
-        from sqlalchemy import select
         from agenteval_api.models.orm import TestCaseORM
+        from sqlalchemy import select
 
         async with SessionLocal() as session:
             result = await session.execute(select(TestCaseORM).where(TestCaseORM.dataset_version_id == version_id))

@@ -7,7 +7,8 @@ entire eval run (see SRS NFR-AVAIL-3).
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Protocol, runtime_checkable
+from collections.abc import Callable
+from typing import Any, Protocol, runtime_checkable
 
 from agenteval_core.models import OutputType, ScoreResult
 
@@ -32,7 +33,7 @@ class BaseScorer:
     def score(self, input: Any, output: Any, expected: Any, metadata: dict) -> ScoreResult:
         try:
             return self._score(input, output, expected, metadata or {})
-        except Exception as exc:  # noqa: BLE001 - intentional catch-all per scorer contract
+        except Exception as exc:
             return ScoreResult(error=f"{type(exc).__name__}: {exc}")
 
 

@@ -75,7 +75,7 @@ class Dataset(BaseModel):
     test_cases: list[TestCase] = Field(default_factory=list)
 
     @classmethod
-    def from_jsonl(cls, path: str, name: str | None = None) -> "Dataset":
+    def from_jsonl(cls, path: str, name: str | None = None) -> Dataset:
         import json
 
         test_cases: list[TestCase] = []
@@ -101,7 +101,7 @@ class Dataset(BaseModel):
         return cls(name=name or path, test_cases=test_cases)
 
     @classmethod
-    def from_csv(cls, path: str, name: str | None = None) -> "Dataset":
+    def from_csv(cls, path: str, name: str | None = None) -> Dataset:
         import csv
 
         test_cases: list[TestCase] = []
@@ -127,8 +127,8 @@ class EvalResult(BaseModel):
     test_case_id: str
     actual_output: Any = None
     status: str = "ok"  # ok | error
-    error_message: Optional[str] = None
-    latency_ms: Optional[int] = None
+    error_message: str | None = None
+    latency_ms: int | None = None
     scores: dict[str, ScoreResult] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=_now)
 
@@ -141,36 +141,36 @@ class EvalRunSummary(BaseModel):
     completed_test_cases: int = 0
     aggregate_metrics: dict[str, Any] = Field(default_factory=dict)
     started_at: datetime = Field(default_factory=_now)
-    completed_at: Optional[datetime] = None
+    completed_at: datetime | None = None
 
 
 class Span(BaseModel):
     id: str = Field(default_factory=_uuid)
     trace_id: str
-    parent_span_id: Optional[str] = None
+    parent_span_id: str | None = None
     span_type: SpanType = SpanType.CUSTOM
     name: str = ""
     input: Any = None
     output: Any = None
-    model_name: Optional[str] = None
+    model_name: str | None = None
     prompt_tokens: int = 0
     completion_tokens: int = 0
     cost: float = 0.0
     status: str = "ok"
-    error_message: Optional[str] = None
+    error_message: str | None = None
     started_at: datetime = Field(default_factory=_now)
-    ended_at: Optional[datetime] = None
+    ended_at: datetime | None = None
 
 
 class Trace(BaseModel):
     id: str = Field(default_factory=_uuid)
-    project_id: Optional[str] = None
+    project_id: str | None = None
     environment: str = "development"
     metadata: dict[str, Any] = Field(default_factory=dict)
     status: str = "ok"
     spans: list[Span] = Field(default_factory=list)
     started_at: datetime = Field(default_factory=_now)
-    ended_at: Optional[datetime] = None
+    ended_at: datetime | None = None
 
     @property
     def total_tokens(self) -> int:
@@ -181,7 +181,7 @@ class Trace(BaseModel):
         return sum(s.cost for s in self.spans)
 
     @property
-    def duration_ms(self) -> Optional[int]:
+    def duration_ms(self) -> int | None:
         if self.ended_at is None:
             return None
         return int((self.ended_at - self.started_at).total_seconds() * 1000)

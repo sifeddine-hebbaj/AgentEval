@@ -12,12 +12,15 @@ import atexit
 import queue
 import threading
 import time
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from agenteval_core.engine import EvalEngine
 from agenteval_core.models import Dataset, EvalRunSummary, Trace
 from agenteval_core.scorers.base import Scorer
 from agenteval_sdk.local_repository import SQLiteEvalResultRepository
+
+if TYPE_CHECKING:
+    import queue
 from agenteval_sdk.tracing import DiskFallbackQueue
 
 

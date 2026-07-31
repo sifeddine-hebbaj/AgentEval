@@ -10,9 +10,7 @@ from __future__ import annotations
 import importlib
 import json
 import subprocess
-import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -96,10 +94,10 @@ def _render_results_table(aggregate: dict) -> None:
 @app.command()
 def run(
     config_path: str = typer.Option("agenteval.yaml", "--config", "-c", help="Path to agenteval.yaml"),
-    dataset_override: Optional[str] = typer.Option(None, "--dataset", help="Override dataset path from config"),
+    dataset_override: str | None = typer.Option(None, "--dataset", help="Override dataset path from config"),
     local: bool = typer.Option(True, "--local/--remote", help="Run fully locally (SQLite) vs. against a server"),
     gate: bool = typer.Option(False, "--gate", help="Apply gate policy and exit non-zero on failure"),
-    report_file: Optional[str] = typer.Option(None, "--report-file", help="Write a JSON report to this path"),
+    report_file: str | None = typer.Option(None, "--report-file", help="Write a JSON report to this path"),
 ) -> None:
     """Run an evaluation against a dataset using the scorers/gate policy
     defined in agenteval.yaml.

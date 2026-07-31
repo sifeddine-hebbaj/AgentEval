@@ -7,15 +7,12 @@ from __future__ import annotations
 import uuid
 
 from celery import chord
-from sqlalchemy import select
-from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from agenteval_api.celery_app import celery_app
 from agenteval_api.config import settings
 from agenteval_api.models.orm import (
-    Baseline,
-    EvalRun,
     EvalSuiteScorer,
     ScorerVersion,
     TestCaseORM,

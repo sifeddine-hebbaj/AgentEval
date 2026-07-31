@@ -1,8 +1,6 @@
 """agenteval.yaml schema and loader."""
 from __future__ import annotations
 
-
-
 import yaml
 from pydantic import BaseModel, Field
 
@@ -34,7 +32,7 @@ class AgentEvalConfig(BaseModel):
     base_url: str = "http://localhost:8000"
 
     @classmethod
-    def from_yaml(cls, path: str) -> "AgentEvalConfig":
+    def from_yaml(cls, path: str) -> AgentEvalConfig:
         with open(path, "r", encoding="utf-8") as f:
             try:
                 raw = yaml.safe_load(f)

@@ -10,17 +10,19 @@ from __future__ import annotations
 import functools
 import json
 import threading
-import time
 from contextlib import contextmanager
 from contextvars import ContextVar
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from agenteval_core.models import Span, SpanType, Trace
 
-_current_trace: ContextVar[Optional[Trace]] = ContextVar("_current_trace", default=None)
-_span_stack: ContextVar[list[str]] = ContextVar("_span_stack", default=[])
+if TYPE_CHECKING:
+    from agenteval_sdk.client import Client
+
+_current_trace: ContextVar[Trace | None] = ContextVar("_current_trace", default=None)
+_span_stack: ContextVar[list[str]] = ContextVar("_span_stack", default=None)
 
 
 class _SpanHandle:
@@ -50,6 +52,9 @@ def span(type: str = "custom", name: str = "", model: str | None = None):
             "with @trace(client=...) first."
         )
     stack = _span_stack.get()
+    if stack is None:
+        stack = []
+        _span_stack.set(stack)
     parent_id = stack[-1] if stack else None
 
     s = Span(trace_id=trace_obj.id, parent_span_id=parent_id, span_type=SpanType(type), name=name, model_name=model)
@@ -64,11 +69,11 @@ def span(type: str = "custom", name: str = "", model: str | None = None):
         s.error_message = f"{exc.__class__.__name__}: {exc}"
         raise
     finally:
-        s.ended_at = datetime.now(timezone.utc)
+        s.ended_at = datetime.now(UTC)
         _span_stack.set(stack)
 
 
-def trace(client: "Client", name: str = ""):
+def trace(client: Client, name: str = ""):
     """Decorator that opens a Trace, runs the wrapped function, and
     flushes the trace to the configured Client (local SQLite or network)
     on exit -- even if the function raised.
@@ -88,7 +93,7 @@ def trace(client: "Client", name: str = ""):
                 trace_obj.status = "error"
                 raise
             finally:
-                trace_obj.ended_at = datetime.now(timezone.utc)
+                trace_obj.ended_at = datetime.now(UTC)
                 _current_trace.reset(token)
                 _span_stack.reset(stack_token)
                 client._enqueue_trace(trace_obj)
@@ -110,9 +115,8 @@ class DiskFallbackQueue:
         self._lock = threading.Lock()
 
     def push(self, trace_obj: Trace) -> None:
-        with self._lock:
-            with open(self.path, "a", encoding="utf-8") as f:
-                f.write(trace_obj.model_dump_json() + "\n")
+        with self._lock, open(self.path, "a", encoding="utf-8") as f:
+            f.write(trace_obj.model_dump_json() + "\n")
 
     def drain(self) -> list[Trace]:
         with self._lock:

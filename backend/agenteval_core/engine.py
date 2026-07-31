@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import inspect
 import time
+from collections.abc import Awaitable, Callable
 from statistics import mean, median
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 from agenteval_core.models import Dataset, EvalResult, EvalRunSummary, RunStatus, TestCase
 from agenteval_core.repository import EvalResultRepository
@@ -40,7 +41,7 @@ class EvalEngine:
         try:
             actual_output = self._invoke_runner(runner, test_case)
             status, error_message = "ok", None
-        except Exception as exc:  # noqa: BLE001 - intentional: isolate runner failures
+        except Exception as exc:
             actual_output, status, error_message = None, "error", f"{type(exc).__name__}: {exc}"
 
         latency_ms = int((time.perf_counter() - start) * 1000)

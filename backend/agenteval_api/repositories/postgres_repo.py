@@ -19,9 +19,9 @@ from datetime import UTC, datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from agenteval_core.models import EvalResult, EvalRunSummary, RunStatus, ScoreResult
 from agenteval_api.models.orm import EvalResult as EvalResultORM
 from agenteval_api.models.orm import EvalRun, Score
+from agenteval_core.models import EvalResult, EvalRunSummary, RunStatus, ScoreResult
 
 
 def _sync_url(async_url: str) -> str:

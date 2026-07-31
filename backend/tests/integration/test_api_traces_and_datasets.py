@@ -8,10 +8,10 @@ work end-to-end, not just in isolation.
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from agenteval_api.main import app
 from agenteval_api.db import SessionLocal
-from agenteval_api.models.orm import Organization, Project, ApiKey, User
-from agenteval_api.security import generate_api_key, hash_password
+from agenteval_api.main import app
+from agenteval_api.models.orm import ApiKey, Organization, Project
+from agenteval_api.security import generate_api_key
 
 
 @pytest.fixture
@@ -51,7 +51,7 @@ async def other_project_and_key():
 
 @pytest.mark.anyio
 async def test_trace_ingestion_and_retrieval(project_and_key):
-    project_id, api_key = project_and_key
+    _project_id, api_key = project_and_key
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         headers = {"Authorization": f"Bearer {api_key}"}
         payload = {
@@ -87,7 +87,7 @@ async def test_cross_tenant_trace_access_is_denied(project_and_key, other_projec
     (SRS section 12.2): a trace created under one project must be
     invisible to a different project's API key, even with the correct ID.
     """
-    project_id, api_key = project_and_key
+    _project_id, api_key = project_and_key
     _, other_api_key = other_project_and_key
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
