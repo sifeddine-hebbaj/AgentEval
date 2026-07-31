@@ -1,0 +1,36 @@
+name: "AgentEval Gate"
+description: "Runs an AgentEval evaluation against your agent and fails the build on a regression."
+inputs:
+  config:
+    description: "Path to agenteval.yaml"
+    required: false
+    default: "agenteval.yaml"
+  python-version:
+    description: "Python version to use"
+    required: false
+    default: "3.11"
+outputs:
+  report-file:
+    description: "Path to the generated JSON eval report"
+    value: ${{ steps.run.outputs.report-file }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install AgentEval CLI
+      shell: bash
+      run: pip install agenteval
+    - name: Run evaluation gate
+      id: run
+      shell: bash
+      run: |
+        agenteval run --config "${{ inputs.config }}" --local --gate --report-file eval-report.json
+        echo "report-file=eval-report.json" >> "$GITHUB_OUTPUT"
+    - name: Upload eval report artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: agenteval-report
+        path: eval-report.json

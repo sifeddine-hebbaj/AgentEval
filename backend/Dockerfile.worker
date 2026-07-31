@@ -1,0 +1,18 @@
+FROM python:3.11-slim AS base
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc libpq-dev docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY pyproject.toml ./
+COPY agenteval_core ./agenteval_core
+COPY agenteval_api ./agenteval_api
+COPY agenteval_worker ./agenteval_worker
+COPY agenteval_sdk ./agenteval_sdk
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir ".[api,judge-openai,judge-anthropic,judge-local,sdk]"
+
+CMD ["celery", "-A", "agenteval_worker.tasks:celery_app", "worker", "--loglevel=info", "--concurrency=4"]

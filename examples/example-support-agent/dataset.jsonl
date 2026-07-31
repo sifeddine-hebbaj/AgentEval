@@ -1,0 +1,5 @@
+{"input": "How do I get a refund?", "expected_output": "Based on our documentation: Refunds are processed within 5-7 business days to the original payment method.", "tags": ["refund", "critical"]}
+{"input": "I forgot my password, help!", "expected_output": "Based on our documentation: To reset your password, click 'Forgot password' on the login screen and follow the emailed link.", "tags": ["password", "critical"]}
+{"input": "How long does shipping take?", "expected_output": "Based on our documentation: Standard shipping takes 3-5 business days; express shipping takes 1-2 business days.", "tags": ["shipping"]}
+{"input": "How do I cancel my subscription?", "expected_output": "Based on our documentation: You can cancel your subscription anytime from Account Settings > Subscription > Cancel.", "tags": ["cancel", "critical"]}
+{"input": "What's your favorite color?", "expected_output": "Based on our documentation: No specific documentation found for this query.", "tags": ["out_of_scope"]}

@@ -1,0 +1,19 @@
+# Example workflow showing how a downstream repo would use the
+# AgentEval GitHub Action to gate pull requests. Not run by this
+# repo's own CI (see ci.yml's dogfood-example-agent job for that) --
+# this file exists purely as copy-paste reference documentation.
+name: agent-eval-gate-example
+
+on:
+  pull_request:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/agenteval-gate
+        with:
+          config: examples/example-support-agent/agenteval.yaml
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
