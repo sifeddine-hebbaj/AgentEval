@@ -84,6 +84,8 @@ class PostgresEvalResultRepository:
                 )
 
             run = session.get(EvalRun, uuid.UUID(result.run_id))
+            if run is None:
+                raise KeyError(f"eval run {result.run_id} not found")
             run.completed_test_cases += 1
             session.commit()
 
@@ -106,6 +108,8 @@ class PostgresEvalResultRepository:
     def update_run_status(self, run_id: str, status: RunStatus, aggregate_metrics: dict | None = None) -> None:
         with self.Session() as session:
             run = session.get(EvalRun, uuid.UUID(run_id))
+            if run is None:
+                raise KeyError(f"eval run {run_id} not found")
             run.status = status.value
             if aggregate_metrics is not None:
                 run.aggregate_metrics = aggregate_metrics

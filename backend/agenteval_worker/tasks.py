@@ -20,6 +20,7 @@ from agenteval_api.models.orm import (
 from agenteval_api.repositories.postgres_repo import PostgresEvalResultRepository, _sync_url
 from agenteval_core.engine import EvalEngine
 from agenteval_core.models import RunStatus, TestCase
+from agenteval_core.scorers.base import Scorer
 from agenteval_core.scorers import registry as core_registry
 from agenteval_core.scorers.llm_judge import (
     AnthropicJudgeAdapter,
@@ -48,7 +49,9 @@ def _build_scorers_for_suite(session: Session, eval_suite_id: uuid.UUID) -> list
     )
     scorers = []
     for link in links:
-        version: ScorerVersion = session.get(ScorerVersion, link.scorer_version_id)
+        version: ScorerVersion | None = session.get(ScorerVersion, link.scorer_version_id)
+        if version is None:
+            continue
         scorer_type = version.scorer.scorer_type  # e.g. "exact_match" -- the registry key.
         # version.scorer.name is the user-facing display name (e.g. "exact_match_check")
         # and is NEVER used for registry lookup; only scorer_type is.
@@ -60,7 +63,8 @@ def _build_scorers_for_suite(session: Session, eval_suite_id: uuid.UUID) -> list
                 kwargs["rubric_template"] = rubric
             scorers.append(LLMJudgeScorer(**kwargs))
         else:
-            scorers.append(core_registry.create(scorer_type, **version.config))
+            scorer = core_registry.create(scorer_type, **version.config)
+            scorers.append(scorer)
     return scorers
 
 
@@ -75,6 +79,8 @@ def score_test_case_task(
 ) -> None:
     with _Session() as session:
         test_case_row = session.get(TestCaseORM, uuid.UUID(test_case_id))
+        if test_case_row is None:
+            raise KeyError(f"test case {test_case_id} not found")
         scorers = _build_scorers_for_suite(session, uuid.UUID(eval_suite_id))
 
     repo = PostgresEvalResultRepository(
@@ -116,9 +122,12 @@ def finalize_run_task(_results, run_id: str, project_id: str, eval_suite_id: str
     repo.update_run_status(run_id, final_status, aggregate_metrics=aggregate)
 
 
-class _DummyScorer:
+class _DummyScorer(Scorer):
     name = "_unused"
     output_type = "numeric"
+
+    def _score(self, *a, **k):
+        raise NotImplementedError("this scorer is never invoked; it satisfies EvalEngine's non-empty check")
 
     def score(self, *a, **k):
         raise NotImplementedError("this scorer is never invoked; it satisfies EvalEngine's non-empty check")

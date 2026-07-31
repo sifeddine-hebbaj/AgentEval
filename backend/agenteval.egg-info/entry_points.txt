@@ -1,0 +1,2 @@
+[console_scripts]
+agenteval = agenteval_cli.main:app

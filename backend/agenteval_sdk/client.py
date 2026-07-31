@@ -12,15 +12,12 @@ import atexit
 import queue
 import threading
 import time
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from agenteval_core.engine import EvalEngine
 from agenteval_core.models import Dataset, EvalRunSummary, Trace
 from agenteval_core.scorers.base import Scorer
 from agenteval_sdk.local_repository import SQLiteEvalResultRepository
-
-if TYPE_CHECKING:
-    import queue
 from agenteval_sdk.tracing import DiskFallbackQueue
 
 
@@ -43,12 +40,12 @@ class Client:
             raise ValueError("Client requires api_key unless local=True")
 
         if local:
-            self._repository = SQLiteEvalResultRepository(local_db_path)
+            self._repository: SQLiteEvalResultRepository | None = SQLiteEvalResultRepository(local_db_path)
         else:
             self._repository = None  # server owns the repository in network mode
 
         self._fallback_queue = DiskFallbackQueue()
-        self._send_queue: "queue.Queue[Trace]" = queue.Queue(maxsize=10_000)
+        self._send_queue: queue.Queue[Trace] = queue.Queue(maxsize=10_000)
         self._stop_event = threading.Event()
         if not local:
             self._flush_thread = threading.Thread(
@@ -111,7 +108,7 @@ class Client:
             return Dataset.from_csv(path)
         raise ValueError(f"Unsupported dataset file type: {path}")
 
-    # -- Eval runs (local mode) --------------------------------------------------
+    # -- Eval runs (local mode) ------------------------------------------------
 
     def run_eval(self, dataset: Dataset, runner, scorers: list[Scorer]) -> EvalRunSummary:
         if not self.local:

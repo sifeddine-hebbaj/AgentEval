@@ -108,12 +108,13 @@ async def list_dataset_versions(
         count_result = await db.execute(
             select(func.count()).select_from(TestCaseORM).where(TestCaseORM.dataset_version_id == v.id)
         )
+        test_case_count = count_result.scalar() or 0
         out.append(
             DatasetVersionResponse(
                 id=v.id,
                 dataset_id=dataset_id,
                 version_number=v.version_number,
-                test_case_count=count_result.scalar(),
+                test_case_count=test_case_count,
                 created_at=v.created_at,
             )
         )

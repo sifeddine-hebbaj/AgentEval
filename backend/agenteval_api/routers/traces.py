@@ -18,6 +18,7 @@ from agenteval_api.config import settings
 from agenteval_api.db import get_db
 from agenteval_api.deps import get_current_project_id
 from agenteval_api.models.orm import Span, Trace
+from agenteval_api.schemas.schemas import SpanIn
 from agenteval_api.schemas.schemas import TraceDetailOut, TraceIn, TraceOut
 
 router = APIRouter(prefix="/v1/traces", tags=["traces"])
@@ -150,22 +151,22 @@ async def get_trace(
         ended_at=trace.ended_at,
         metadata=trace.metadata_,
         spans=[
-            {
-                "id": s.id,
-                "parent_span_id": s.parent_span_id,
-                "span_type": s.span_type,
-                "name": s.name,
-                "input": s.input_ref,
-                "output": s.output_ref,
-                "model_name": s.model_name,
-                "prompt_tokens": s.prompt_tokens,
-                "completion_tokens": s.completion_tokens,
-                "cost": s.cost,
-                "status": s.status,
-                "error_message": s.error_message,
-                "started_at": s.started_at,
-                "ended_at": s.ended_at,
-            }
+            SpanIn(
+                id=s.id,
+                parent_span_id=s.parent_span_id,
+                span_type=s.span_type,
+                name=s.name,
+                input=s.input_ref,
+                output=s.output_ref,
+                model_name=s.model_name,
+                prompt_tokens=s.prompt_tokens,
+                completion_tokens=s.completion_tokens,
+                cost=s.cost,
+                status=s.status,
+                error_message=s.error_message,
+                started_at=s.started_at,
+                ended_at=s.ended_at,
+            )
             for s in spans
         ],
     )

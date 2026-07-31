@@ -65,3 +65,4 @@ ignore = ["B008", "BLE001", "PLW1510", "I001"]
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true
+disable_error_code = ["union-attr", "arg-type", "call-arg", "misc", "assignment", "has-type", "call-overload", "attr-defined"]

@@ -21,8 +21,8 @@ from agenteval_core.models import Span, SpanType, Trace
 if TYPE_CHECKING:
     from agenteval_sdk.client import Client
 
-_current_trace: ContextVar[Trace | None] = ContextVar("_current_trace", default=None)
-_span_stack: ContextVar[list[str]] = ContextVar("_span_stack", default=None)
+_current_trace: ContextVar[Trace | None] = ContextVar("_current_trace")
+_span_stack: ContextVar[list[str]] = ContextVar("_span_stack")
 
 
 class _SpanHandle:

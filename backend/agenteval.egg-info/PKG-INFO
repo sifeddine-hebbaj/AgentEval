@@ -1,0 +1,44 @@
+Metadata-Version: 2.4
+Name: agenteval
+Version: 0.1.0
+Summary: Open-source agent evaluation and regression testing framework
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic<3,>=2.6
+Requires-Dist: jsonschema>=4.21
+Provides-Extra: sdk
+Requires-Dist: httpx>=0.27; extra == "sdk"
+Provides-Extra: cli
+Requires-Dist: typer>=0.12; extra == "cli"
+Requires-Dist: rich>=13.7; extra == "cli"
+Requires-Dist: pyyaml>=6.0; extra == "cli"
+Requires-Dist: httpx>=0.27; extra == "cli"
+Provides-Extra: judge-openai
+Requires-Dist: openai>=1.30; extra == "judge-openai"
+Provides-Extra: judge-anthropic
+Requires-Dist: anthropic>=0.30; extra == "judge-anthropic"
+Provides-Extra: judge-local
+Requires-Dist: httpx>=0.27; extra == "judge-local"
+Provides-Extra: api
+Requires-Dist: fastapi>=0.111; extra == "api"
+Requires-Dist: uvicorn[standard]>=0.30; extra == "api"
+Requires-Dist: sqlalchemy[asyncio]>=2.0; extra == "api"
+Requires-Dist: asyncpg>=0.29; extra == "api"
+Requires-Dist: alembic>=1.13; extra == "api"
+Requires-Dist: python-jose[cryptography]>=3.3; extra == "api"
+Requires-Dist: passlib[argon2]>=1.7; extra == "api"
+Requires-Dist: python-multipart>=0.0.9; extra == "api"
+Requires-Dist: redis>=5.0; extra == "api"
+Requires-Dist: celery>=5.4; extra == "api"
+Requires-Dist: slowapi>=0.1.9; extra == "api"
+Requires-Dist: boto3>=1.34; extra == "api"
+Requires-Dist: pydantic-settings>=2.0; extra == "api"
+Requires-Dist: email-validator>=2.0; extra == "api"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.2; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23; extra == "dev"
+Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: ruff>=0.4; extra == "dev"
+Requires-Dist: mypy>=1.10; extra == "dev"
+Requires-Dist: httpx>=0.27; extra == "dev"
