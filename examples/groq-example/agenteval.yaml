@@ -1,0 +1,8 @@
+project: groq-benchmark
+dataset: benchmark_dataset.jsonl
+runner: "python run_wrapper.py"
+scorers:
+  - name: exact_match
+    type: contains
+    weight: 1.0
+    is_critical: true

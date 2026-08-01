@@ -7,6 +7,7 @@ import Datasets from "./pages/Datasets";
 import EvalRuns from "./pages/EvalRuns";
 import EvalRunDetail from "./pages/EvalRunDetail";
 import Trends from "./pages/Trends";
+import ResultsDashboard from "./pages/ResultsDashboard";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   if (!api.hasApiKey()) return <Navigate to="/login" replace />;
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/datasets" element={<Datasets />} />
         <Route path="/eval-runs" element={<EvalRuns />} />
         <Route path="/eval-runs/:runId" element={<EvalRunDetail />} />
+        <Route path="/results" element={<ResultsDashboard />} />
         <Route path="/trends" element={<Trends />} />
         <Route path="/" element={<Navigate to="/traces" replace />} />
       </Route>

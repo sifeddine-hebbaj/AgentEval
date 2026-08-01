@@ -69,9 +69,14 @@ def _build_scorers_for_suite(session: Session, eval_suite_id: uuid.UUID) -> list
             kwargs = {"adapter": adapter, "scorer_version_id": str(version.id)}
             if rubric:
                 kwargs["rubric_template"] = rubric
-            scorers.append(LLMJudgeScorer(**kwargs))
+            # Override the name to use scorer_type for consistent scoring keys
+            scorer = LLMJudgeScorer(**kwargs)
+            scorer.name = scorer_type
+            scorers.append(scorer)
         else:
             scorer = core_registry.create(scorer_type, **version.config)
+            # Override the name to use scorer_type for consistent scoring keys
+            scorer.name = scorer_type
             scorers.append(scorer)
     return scorers
 

@@ -119,3 +119,39 @@ async def list_dataset_versions(
             )
         )
     return out
+
+
+@router.get("/{dataset_id}/versions/{version_id}")
+async def get_dataset_version(
+    dataset_id: UUID,
+    version_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    project_id: UUID = Depends(get_current_project_id),
+):
+    await _get_owned_dataset(dataset_id, db, project_id)
+    version = await db.get(DatasetVersion, version_id)
+    if version is None or version.dataset_id != dataset_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset version not found.")
+    
+    result = await db.execute(
+        select(TestCaseORM).where(TestCaseORM.dataset_version_id == version_id)
+    )
+    test_cases = result.scalars().all()
+    
+    return {
+        "id": version.id,
+        "dataset_id": dataset_id,
+        "version_number": version.version_number,
+        "test_case_count": len(test_cases),
+        "created_at": version.created_at,
+        "test_cases": [
+            {
+                "id": tc.id,
+                "input": tc.input,
+                "expected_output": tc.expected_output,
+                "metadata": tc.metadata_,
+                "tags": tc.tags,
+            }
+            for tc in test_cases
+        ],
+    }

@@ -77,6 +77,8 @@ export type ScoreOut = {
 export type EvalResultOut = {
   id: string;
   test_case_id: string;
+  test_case_input: unknown;
+  test_case_expected_output: unknown;
   actual_output: unknown;
   status: string;
   latency_ms: number | null;

@@ -123,12 +123,16 @@ async def get_eval_run_results(
     rows = result.scalars().all()
     out = []
     for row in rows:
+        # Get the test case to include input and expected output
+        test_case = await db.get(TestCaseORM, row.test_case_id)
         scores_result = await db.execute(select(Score).where(Score.eval_result_id == row.id))
         scores = scores_result.scalars().all()
         out.append(
             EvalResultOut(
                 id=row.id,
                 test_case_id=row.test_case_id,
+                test_case_input=test_case.input if test_case else None,
+                test_case_expected_output=test_case.expected_output if test_case else None,
                 actual_output=row.actual_output,
                 status=row.status,
                 latency_ms=row.latency_ms,

@@ -118,6 +118,7 @@ class DatasetVersionCreateRequest(BaseModel):
 
 class DatasetResponse(BaseModel):
     id: UUID
+    project_id: UUID
     name: str
     description: str
     created_at: datetime
@@ -146,9 +147,13 @@ class ScorerCreateRequest(BaseModel):
 class ScorerVersionResponse(BaseModel):
     id: UUID
     scorer_id: UUID
+    scorer_name: str
+    scorer_type: str
+    project_id: UUID
     version_number: int
     config: dict[str, Any]
     output_type: str
+    created_at: datetime
 
 
 class EvalSuiteCreateRequest(BaseModel):
@@ -163,6 +168,7 @@ class EvalSuiteResponse(BaseModel):
     id: UUID
     project_id: UUID
     name: str
+    scorer_version_ids: list[UUID] = []
 
 
 # -- Eval Runs ----------------------------------------------------------------
@@ -200,6 +206,8 @@ class ScoreOut(BaseModel):
 class EvalResultOut(BaseModel):
     id: UUID
     test_case_id: UUID
+    test_case_input: Any
+    test_case_expected_output: Any
     actual_output: Any
     status: str
     latency_ms: int | None

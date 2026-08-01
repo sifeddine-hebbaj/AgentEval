@@ -5,6 +5,7 @@ const navItems = [
   { to: "/traces", label: "Traces", glyph: "◆" },
   { to: "/datasets", label: "Datasets", glyph: "▤" },
   { to: "/eval-runs", label: "Eval Runs", glyph: "▲" },
+  { to: "/results", label: "Results", glyph: "▦" },
   { to: "/trends", label: "Trends", glyph: "∿" },
 ];
 

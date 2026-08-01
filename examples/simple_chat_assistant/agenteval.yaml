@@ -1,0 +1,13 @@
+project: simple-chat-assistant
+dataset: examples/simple_chat_assistant/dataset.jsonl
+runner: "python examples/simple_chat_assistant/run_wrapper.py"
+scorers:
+  - name: contains_check
+    type: contains
+    weight: 1.0
+    is_critical: true
+gate:
+  mode: block
+  min_mean_score:
+    contains_check: 0.8
+  max_regression_delta: 0.1

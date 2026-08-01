@@ -63,7 +63,145 @@ async def create_scorer(
     db.add(version)
     await db.commit()
     await db.refresh(version)
-    return version
+    
+    # Return response with synthetic fields
+    return ScorerVersionResponse(
+        id=version.id,
+        scorer_id=version.scorer_id,
+        scorer_name=scorer.name,
+        scorer_type=scorer.scorer_type,
+        project_id=project_id,
+        version_number=version.version_number,
+        config=version.config,
+        output_type=version.output_type,
+        created_at=version.created_at,
+    )
+
+
+@router.get("", response_model=list[ScorerVersionResponse])
+async def list_scorers(
+    db: AsyncSession = Depends(get_db),
+    project_id: UUID = Depends(get_current_project_id),
+):
+    result = await db.execute(
+        select(Scorer).where(Scorer.project_id == project_id)
+    )
+    scorers = result.scalars().all()
+    
+    # Get latest versions for each scorer
+    responses = []
+    for scorer in scorers:
+        version_result = await db.execute(
+            select(ScorerVersion).where(ScorerVersion.scorer_id == scorer.id).order_by(ScorerVersion.version_number.desc()).limit(1)
+        )
+        version = version_result.scalar_one_or_none()
+        if version:
+            responses.append(ScorerVersionResponse(
+                id=version.id,
+                scorer_id=version.scorer_id,
+                scorer_name=scorer.name,
+                scorer_type=scorer.scorer_type,
+                project_id=project_id,
+                version_number=version.version_number,
+                config=version.config,
+                output_type=version.output_type,
+                created_at=version.created_at,
+            ))
+    
+    return responses
+
+
+@router.get("/{scorer_id}/versions", response_model=list[ScorerVersionResponse])
+async def list_scorer_versions(
+    scorer_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    project_id: UUID = Depends(get_current_project_id),
+):
+    result = await db.execute(
+        select(Scorer).where(Scorer.id == scorer_id, Scorer.project_id == project_id)
+    )
+    scorer = result.scalar_one_or_none()
+    if scorer is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scorer not found")
+    
+    result = await db.execute(
+        select(ScorerVersion).where(ScorerVersion.scorer_id == scorer_id)
+    )
+    return result.scalars().all()
+
+
+@router.post("/{scorer_id}/versions", response_model=ScorerVersionResponse, status_code=status.HTTP_201_CREATED)
+async def create_scorer_version(
+    scorer_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    project_id: UUID = Depends(get_current_project_id),
+):
+    result = await db.execute(
+        select(Scorer).where(Scorer.id == scorer_id, Scorer.project_id == project_id)
+    )
+    scorer = result.scalar_one_or_none()
+    if scorer is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Scorer not found")
+    
+    version_count_result = await db.execute(
+        select(func.max(ScorerVersion.version_number)).where(ScorerVersion.scorer_id == scorer_id)
+    )
+    next_version = (version_count_result.scalar() or 0) + 1
+    
+    version = ScorerVersion(
+        scorer_id=scorer.id,
+        version_number=next_version,
+        config={},
+        output_type="numeric",
+    )
+    db.add(version)
+    await db.commit()
+    await db.refresh(version)
+    
+    # Add synthetic fields for response
+    response = ScorerVersionResponse(
+        id=version.id,
+        scorer_id=version.scorer_id,
+        scorer_name=scorer.name,
+        scorer_type=scorer.scorer_type,
+        project_id=project_id,
+        version_number=version.version_number,
+        config=version.config,
+        output_type=version.output_type,
+        created_at=version.created_at,
+    )
+    return response
+
+
+@suites_router.get("", response_model=list[EvalSuiteResponse])
+async def list_eval_suites(
+    db: AsyncSession = Depends(get_db),
+    project_id: UUID = Depends(get_current_project_id),
+):
+    result = await db.execute(
+        select(EvalSuite).where(EvalSuite.project_id == project_id)
+    )
+    suites = result.scalars().all()
+    
+    # Enrich with scorer_version_ids for each suite
+    enriched_suites = []
+    for suite in suites:
+        scorer_result = await db.execute(
+            select(EvalSuiteScorer).where(EvalSuiteScorer.eval_suite_id == suite.id)
+        )
+        scorer_links = scorer_result.scalars().all()
+        scorer_version_ids = [link.scorer_version_id for link in scorer_links]
+        
+        # Create a dict representation with the additional field
+        suite_dict = {
+            "id": suite.id,
+            "project_id": suite.project_id,
+            "name": suite.name,
+            "scorer_version_ids": scorer_version_ids
+        }
+        enriched_suites.append(suite_dict)
+    
+    return enriched_suites
 
 
 @suites_router.post("", response_model=EvalSuiteResponse, status_code=status.HTTP_201_CREATED)
@@ -87,4 +225,18 @@ async def create_eval_suite(
         )
     await db.commit()
     await db.refresh(suite)
-    return suite
+    
+    # Enrich response with scorer_version_ids
+    scorer_result = await db.execute(
+        select(EvalSuiteScorer).where(EvalSuiteScorer.eval_suite_id == suite.id)
+    )
+    scorer_links = scorer_result.scalars().all()
+    scorer_version_ids = [link.scorer_version_id for link in scorer_links]
+    
+    # Return dict with scorer_version_ids
+    return {
+        "id": suite.id,
+        "project_id": suite.project_id,
+        "name": suite.name,
+        "scorer_version_ids": scorer_version_ids
+    }

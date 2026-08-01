@@ -1,0 +1,9 @@
+{"input": "What is the capital of France?", "expected_output": "Paris", "metadata": {"category": "geography", "difficulty": "easy"}, "tags": ["geography"]}
+{"input": "What is 2 + 2?", "expected_output": "4", "metadata": {"category": "math", "difficulty": "easy"}, "tags": ["math"]}
+{"input": "What is the largest planet in our solar system?", "expected_output": "Jupiter", "metadata": {"category": "science", "difficulty": "easy"}, "tags": ["science"]}
+{"input": "Who wrote Romeo and Juliet?", "expected_output": "Shakespeare", "metadata": {"category": "literature", "difficulty": "medium"}, "tags": ["literature"]}
+{"input": "What is the chemical symbol for gold?", "expected_output": "Au", "metadata": {"category": "chemistry", "difficulty": "easy"}, "tags": ["chemistry"]}
+{"input": "What year did World War II end?", "expected_output": "1945", "metadata": {"category": "history", "difficulty": "medium"}, "tags": ["history"]}
+{"input": "What is the boiling point of water in Celsius?", "expected_output": "100", "metadata": {"category": "science", "difficulty": "easy"}, "tags": ["science"]}
+{"input": "How many continents are there on Earth?", "expected_output": "7", "metadata": {"category": "geography", "difficulty": "easy"}, "tags": ["geography"]}
+{"input": "What is the speed of light in km/s?", "expected_output": "299792", "metadata": {"category": "physics", "difficulty": "hard"}, "tags": ["physics"]}

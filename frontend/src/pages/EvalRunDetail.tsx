@@ -16,24 +16,33 @@ export default function EvalRunDetail() {
   const { runId } = useParams<{ runId: string }>();
   const [run, setRun] = useState<EvalRun | null>(null);
   const [results, setResults] = useState<EvalResultOut[] | null>(null);
+  const [allRuns, setAllRuns] = useState<EvalRun[]>([]);
   const [diff, setDiff] = useState<EvalRunDiff | null>(null);
   const [diffError, setDiffError] = useState<string | null>(null);
   const [showDiff, setShowDiff] = useState(false);
+  const [selectedBaselineId, setSelectedBaselineId] = useState<string>("");
 
   useEffect(() => {
     if (!runId) return;
     api.getEvalRun(runId).then(setRun);
     api.getEvalRunResults(runId).then(setResults);
+    api.listEvalRuns().then(setAllRuns);
   }, [runId]);
 
   async function loadDiff() {
     if (!runId) return;
     setShowDiff(true);
     try {
-      const d = await api.getEvalRunDiff(runId);
+      console.log("[Baseline Comparison] Requesting diff for run:", runId);
+      console.log("[Baseline Comparison] Selected baseline:", selectedBaselineId || "auto");
+      const d = await api.getEvalRunDiff(runId, selectedBaselineId || undefined);
+      console.log("[Baseline Comparison] API Response:", d);
+      console.log("[Baseline Comparison] aggregate_delta:", d.aggregate_delta);
+      console.log("[Baseline Comparison] significance:", d.significance);
       setDiff(d);
       setDiffError(null);
     } catch (e) {
+      console.error("[Baseline Comparison] Error:", e);
       setDiffError(e instanceof Error ? e.message : "Could not load diff.");
     }
   }
@@ -52,7 +61,19 @@ export default function EvalRunDetail() {
     <div className="p-8 max-w-5xl">
       <div className="flex items-center justify-between mb-1">
         <h1 className="font-display text-2xl font-semibold">Eval Run</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <select
+            value={selectedBaselineId}
+            onChange={(e) => setSelectedBaselineId(e.target.value)}
+            className="btn-ghost text-xs px-2 py-1 border border-border"
+          >
+            <option value="">Auto-detect baseline</option>
+            {allRuns.filter(r => r.id !== runId).map(r => (
+              <option key={r.id} value={r.id}>
+                {r.id.slice(0, 8)} ({r.status})
+              </option>
+            ))}
+          </select>
           <button onClick={markBaseline} className="btn-ghost text-xs">
             Set as baseline
           </button>
@@ -89,18 +110,26 @@ export default function EvalRunDetail() {
           ) : (
             <>
               <div className="flex gap-4 mb-4">
-                {Object.entries(diff.significance).map(([scorer, sig]) => (
-                  <div key={scorer} className="text-sm">
-                    <span className="text-muted">{scorer}: </span>
-                    <span className={sig.mean_delta < 0 ? "text-fail" : "text-pass"}>
-                      {sig.mean_delta >= 0 ? "+" : ""}
-                      {sig.mean_delta.toFixed(3)}
-                    </span>
-                    <span className="text-muted text-xs ml-1">
-                      {sig.significant ? "(significant)" : "(not statistically significant)"}
-                    </span>
-                  </div>
-                ))}
+                {Object.entries(diff.aggregate_delta).length === 0 ? (
+                  <p className="text-muted text-sm">No delta data available (runs may have different suite IDs)</p>
+                ) : (
+                  Object.entries(diff.aggregate_delta).map(([scorer, delta]) => {
+                    const sig = diff.significance[scorer];
+                    console.log(`[Baseline Comparison] Rendering delta for scorer: ${scorer}, delta: ${delta}`);
+                    return (
+                      <div key={scorer} className="text-sm">
+                        <span className="text-muted">{scorer}: </span>
+                        <span className={delta < 0 ? "text-fail" : "text-pass"}>
+                          {delta >= 0 ? "+" : ""}
+                          {delta.toFixed(3)}
+                        </span>
+                        <span className="text-muted text-xs ml-1">
+                          {sig?.significant ? "(significant)" : "(not statistically significant)"}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
               {diff.regressed_cases.length === 0 ? (
                 <p className="text-pass text-sm">No regressed test cases vs. baseline.</p>

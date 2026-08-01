@@ -145,3 +145,26 @@ class SQLiteEvalResultRepository:
                 )
             )
         return results
+
+    def get_result(self, test_case_id: str) -> EvalResult | None:
+        cols = [c[0] for c in self.conn.execute("SELECT * FROM eval_results LIMIT 0").description]
+        row = self.conn.execute(
+            "SELECT * FROM eval_results WHERE test_case_id = ? ORDER BY created_at DESC LIMIT 1", (test_case_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        data = dict(zip(cols, row))
+        scores = {
+            k: ScoreResult(**v) for k, v in json.loads(data["scores"]).items()
+        }
+        return EvalResult(
+            id=data["id"],
+            run_id=data["run_id"],
+            test_case_id=data["test_case_id"],
+            actual_output=json.loads(data["actual_output"]) if data["actual_output"] else None,
+            status=data["status"],
+            error_message=data["error_message"],
+            latency_ms=data["latency_ms"],
+            scores=scores,
+            created_at=data["created_at"],
+        )
